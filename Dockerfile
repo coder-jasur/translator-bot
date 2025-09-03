@@ -1,13 +1,13 @@
-FROM python:3.13-slim
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
 WORKDIR /app
 
-COPY pyproject.toml uv.lock /app/
+COPY pyproject.toml /app/
+COPY . /app/
 
-RUN apt-get update && apt-get install -y gcc libpq-dev build-essential && rm -rf /var/lib/apt/lists/*
 
-RUN pip install -r <(uv export --format=requirements-txt)
+RUN uv pip compile /app/pyproject.toml > /app/requirement.txt
 
-COPY . .
+RUN uv pip install -r /app/requirement.txt --system
 
 CMD ["python", "-m", "src.app.main"]
