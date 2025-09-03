@@ -6,8 +6,10 @@ COPY pyproject.toml /app/
 COPY . /app/
 
 
-RUN uv pip compile /app/pyproject.toml > /app/requirement.txt
+RUN uv pip compile pyproject.toml > requirements.txt
 
 RUN uv pip install -r /app/requirement.txt --system
+
+COPY . .
 
 CMD ["python", "-m", "src.app.main"]
