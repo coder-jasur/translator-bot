@@ -4,6 +4,6 @@ WORKDIR /app
 
 COPY . /app/
 
-RUN uv pip install -r /app/requirements.txt --system
+RUN uv pip install -r /app/requirements.txt
 
 CMD ["python", "-m", "src.app.main"]
