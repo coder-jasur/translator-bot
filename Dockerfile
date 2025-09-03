@@ -2,13 +2,12 @@ FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
 WORKDIR /app
 
-COPY pyproject.toml /app/
-COPY uv.lock /app/
 
-RUN uv export --format=requirements-txt > /app/requirements.txt
+RUN apt-get update && apt-get install -y gcc libpq-dev python3-dev
 
-RUN uv pip install -r /app/requirements.txt --system
+COPY pyproject.toml uv.lock /app/
 
+RUN uv sync --frozen --system --no-install-project
 COPY . .
 
 CMD ["python", "-m", "src.app.main"]
