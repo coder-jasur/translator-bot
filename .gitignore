@@ -26,9 +26,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-logs/file/all.log
+s/file/all.log
 
-# Installer logs
+# Installer s
 pip-log.txt
 pip-delete-this-directory.txt
 
