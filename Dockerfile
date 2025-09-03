@@ -1,14 +1,12 @@
-FROM ghcr.io/astral-sh/uv:python3.13-alpine
+FROM python:3.13-slim
 
 WORKDIR /app
 
 COPY pyproject.toml uv.lock /app/
 
-RUN uv export --format=requirements-txt > /app/requirements.txt
+RUN apt-get update && apt-get install -y gcc libpq-dev build-essential && rm -rf /var/lib/apt/lists/*
 
-RUN apk add --no-cache gcc musl-dev postgresql-dev
-
-RUN uv pip install -r /app/requirements.txt --system
+RUN pip install -r <(uv export --format=requirements-txt)
 
 COPY . .
 
