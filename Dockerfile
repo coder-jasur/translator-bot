@@ -4,8 +4,11 @@ WORKDIR /app
 
 COPY pyproject.toml /app/
 COPY uv.lock /app/
-COPY . /app/
 
-RUN uv pip install -r uv.lock --system || uv pip install -r pyproject.toml --system
+RUN uv pip compile /app/pyproject.toml > /app/requirement.txt
+
+RUN uv pip install -r /app/requirement.txt --system
+
+COPY . .
 
 CMD ["python", "-m", "src.app.main"]

@@ -14,7 +14,7 @@ class UserActions:
         username: str,
         language: str,
         language_form: str = "auto",
-        language_to: str = "ru",
+        language_to: str = "en",
         status: str = "unblocked"
     ):
         query = """

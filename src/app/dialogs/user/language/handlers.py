@@ -10,8 +10,9 @@ from src.app.states.language import ChooseTranslateLanguagesSG
 async def on_choose_language(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     conn: Connection = dialog_manager.middleware_data["conn"]
     user_actions = UserActions(conn)
+    user_data = await user_actions.get_user(callback.from_user.id)
 
-    if not user_actions:
+    if not user_data:
         await user_actions.add_user(
             callback.from_user.id,
             callback.from_user.username or callback.from_user.first_name,
