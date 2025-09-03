@@ -5,10 +5,9 @@ WORKDIR /app
 COPY pyproject.toml /app/
 COPY . /app/
 
-
 RUN uv pip compile pyproject.toml > requirements.txt
 
-RUN uv pip install -r /app/requirement.txt --system
+RUN uv pip install -r requirements.txt --system
 
 COPY . .
 
