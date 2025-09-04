@@ -20,7 +20,7 @@ async def on_choose_translate_lang_to(
 
     if "lang to" in item_id:
         await user_actions.update_user_translate_lang_to(
-            item_id[:2],
+            item_id.split("_")[0],
             call.from_user.id
         )
     else:

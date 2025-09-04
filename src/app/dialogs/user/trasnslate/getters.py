@@ -1,4 +1,3 @@
-from pprint import pprint
 
 from aiogram_dialog import DialogManager
 from asyncpg import Connection
@@ -16,11 +15,12 @@ def make_languages(selected: str):
         "es": "🇪🇸 Español",
         "ar": "🇸🇦 Arab",
         "it": "🇮🇹 Italiano",
-        "jp": "🇯🇵 Japanese",
-        "kr": "🇰🇷 Korean",
+        "ja": "🇯🇵 Japanese",
+        "ko": "🇰🇷 Korean",
         "zh-TW": "🇨🇳 Chinese"
 
     }
+    print(selected)
 
     return [
         (code, name + (" ✅" if code == selected else ""))
@@ -40,9 +40,9 @@ def make_languages_to(selected: str):
         "ko": "🇰🇷 Korean",
         "zh-TW": "🇨🇳 Chinese"
     }
-
+    print(selected)
     return [
-        (code + " lang to", name + (" ✅" if code == selected else ""))
+        (code + "_lang to", name + (" ✅" if code == selected else ""))
         for code, name in langs.items()
     ]
 
