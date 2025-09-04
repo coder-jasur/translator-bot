@@ -8,6 +8,7 @@ from aiogram_dialog import setup_dialogs
 
 
 from logs.logger_conf import setup_logging
+from src.app.common.bot_command import bot_commands
 from src.app.common.db_url import construct_postgresql_url
 from src.app.core.config import Settings
 from src.app.database.tables import create_database_tables
@@ -38,6 +39,8 @@ async def main():
 
 
     bot = Bot(token=settings.bot_token, default=DefaultBotProperties(parse_mode="HTML"))
+
+    await bot_commands(bot, settings)
 
     await dp.start_polling(bot)
 
