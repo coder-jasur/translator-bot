@@ -12,11 +12,14 @@ def make_languages(selected: str):
         "uz": "🇺🇿 O'zbekcha",
         "ru": "🇷🇺 Русский",
         "en": "🇺🇸 English",
+        "fr": "🇫🇷 French",
         "es": "🇪🇸 Español",
         "ar": "🇸🇦 Arab",
         "it": "🇮🇹 Italiano",
         "jp": "🇯🇵 Japanese",
         "kr": "🇰🇷 Korean",
+        "zh": "🇨🇳 Chinese"
+
     }
 
     return [
@@ -29,11 +32,13 @@ def make_languages_to(selected: str):
         "uz": "🇺🇿 O'zbekcha",
         "ru": "🇷🇺 Русский",
         "en": "🇺🇸 English",
+        "fr": "🇫🇷 French",
         "es": "🇪🇸 Español",
         "ar": "🇸🇦 Arab",
         "it": "🇮🇹 Italiano",
         "ja": "🇯🇵 Japanese",
         "ko": "🇰🇷 Korean",
+        "zh": "🇨🇳 Chinese"
     }
 
     return [

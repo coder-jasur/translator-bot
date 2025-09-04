@@ -2,17 +2,17 @@ texts = {
     "start": {
         "uz": (
             "😊 Assalomu alaykum, hurmatli foydalanuvchi!\n\n"
-            "🔀 Men matnni 8 tilda tez va samarali tarjima qilib beradigan botman.\n\n"
+            "🔀 Men matnni 10 tilda tez va samarali tarjima qilib beradigan botman.\n\n"
             "🔎 Menga tarjima qilmoqchi bo‘lgan matningizni yuboring"
         ),
         "ru": (
             "😊 Здравствуйте, уважаемый пользователь!\n\n"
-            "🔀 Я бот, который помогу вам быстро и эффективно перевести текст на 8 языка.\n\n"
+            "🔀 Я бот, который поможет вам быстро и эффективно перевести текст на 10 языка.\n\n"
             "🔎 Отправьте мне текст, который вам нужно перевести"
         ),
         "en": (
             "😊 Hello, dear user!\n\n"
-            "🔀 I am a bot that will help you quickly and effectively translate text into 8 languages.\n\n"
+            "🔀 I am a bot that will help you quickly and effectively translate text into 10 languages.\n\n"
             "🔎 Send me the text you want to translate"
         )
     },
