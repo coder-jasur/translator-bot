@@ -18,7 +18,7 @@ def make_languages(selected: str):
         "it": "🇮🇹 Italiano",
         "jp": "🇯🇵 Japanese",
         "kr": "🇰🇷 Korean",
-        "zh": "🇨🇳 Chinese"
+        "zh-TW": "🇨🇳 Chinese"
 
     }
 
@@ -38,7 +38,7 @@ def make_languages_to(selected: str):
         "it": "🇮🇹 Italiano",
         "ja": "🇯🇵 Japanese",
         "ko": "🇰🇷 Korean",
-        "zh": "🇨🇳 Chinese"
+        "zh-TW": "🇨🇳 Chinese"
     }
 
     return [
