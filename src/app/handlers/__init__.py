@@ -1,7 +1,7 @@
 from aiogram import Dispatcher, Router, F
 
-from src.app.dialogs import dialog_register
 from src.app.handlers.admin_commands import admin_commands_router
+from src.app.handlers.broadcasting import broadcater_router
 from src.app.handlers.language import language_router
 from src.app.handlers.start import start_router
 from src.app.handlers.translate import translate_router
@@ -12,6 +12,7 @@ def register_all_routers(dp: Dispatcher, admins: list):
     registrar_admin_routers(main_router, admins)
     main_router.include_router(start_router)
     main_router.include_router(language_router)
+    main_router.include_router(broadcater_router)
     main_router.include_router(translate_router)
 
     dp.include_router(main_router)

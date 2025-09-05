@@ -9,7 +9,7 @@ from aiogram_dialog.widgets.text import Const, Format, Case
 from src.app.dialogs.admin.getters import op_menu_getter, add_channel_title_getter, channel_info_getter
 from src.app.dialogs.admin.handlers import (
     users_count_getter, add_channel, get_channel_info, on_delete_channel,
-    on_edit_op, on_quit_admin_menu
+    on_edit_op, on_quit_admin_menu, on_broadcast
 )
 from src.app.states.admin import AdminStateSG
 from src.app.states.broadcast import BroadcasterSG
@@ -18,15 +18,15 @@ from src.app.states.channel import ChannelsMenu, ChannelMenu
 admin_menu = Dialog(
     Window(
         Const("Выберите действие"),
-        Start(
-            Const("ОП"),
-            id="subscription_channel",
-            state=ChannelsMenu.menu
-        ),
-        Start(
+        # Start(
+        #     Const("ОП"),
+        #     id="subscription_channel",
+        #     state=ChannelsMenu.menu
+        # ),
+        Button(
             Const("Рассылка"),
             id="broadcaster",
-            state=BroadcasterSG.get_creative
+            on_click=on_broadcast
         ),
         SwitchTo(
             Const("количества пользывателей"),
