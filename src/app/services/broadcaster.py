@@ -8,7 +8,7 @@ from aiogram.types import (
     Message, InputMediaPhoto, InputMediaVideo, InputMediaDocument, InputMediaAudio,
     InputMediaAnimation
 )
-from asyncpg import Connection
+from asyncpg import Connection, Pool
 
 from src.app.common.db_url import construct_postgresql_url
 from src.app.core.config import Settings
@@ -21,13 +21,14 @@ class Broadcaster:
 
     def __init__(
             self,
+            pool: Pool,
             bot: Bot,
             session: Connection,
             admin_id: int,
             broadcasting_message: Message | None = None,
             album: list[Message] | None = None,
             batch_size: int = 5000,
-            sleep_seconds: float = 0.04  # Default: 25 messages per second (below API limit)
+            sleep_seconds: float = 0.04,  # Default: 25 messages per second (below API limit)
     ):
         """
         Initialize the broadcaster
@@ -41,6 +42,7 @@ class Broadcaster:
             album: Media album to broadcast
             sleep_seconds: Delay between messages to avoid rate limits
         """
+        self._pool = pool
         self._bot = bot
         self._session = session
         self.broadcasting_message = broadcasting_message
@@ -146,7 +148,7 @@ class Broadcaster:
 
             # Обрабатываем пользователей пачками
             user_actions = UserActions(self._session)
-            async for user_ids, offset in user_actions.iterate_user_ids(self.batch_size):
+            async for user_ids, offset in user_actions.iterate_user_ids(self._pool, self.batch_size):
                 # Обрабатываем текущую пачку пользователей
                 await self._process_batch(user_ids, info_message, info_message_text)
 

@@ -4,7 +4,7 @@ from typing import Any
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
-from asyncpg import Connection
+from asyncpg import Connection, Pool
 
 from src.app.keyboards.inline import back_to_admin_menu_keyboards
 from src.app.services.broadcaster import Broadcaster
@@ -58,10 +58,9 @@ async def on_cancel_broadcast(call: CallbackQuery, state: FSMContext) -> None:
 
 
 @broadcater_router.callback_query(BroadcastingManagerSG.confirm_broadcasting, F.data == "broadcast:confirm")
-async def on_confirm_broadcast(call: CallbackQuery, state: FSMContext, conn: Connection, bot: Bot) -> Any:
+async def on_confirm_broadcast(call: CallbackQuery, state: FSMContext, conn: Connection, bot: Bot, pool: Pool) -> Any:
     try:
         data = await state.get_data()
-        print(data)
         message = data.get("message")
         album = data.get("album")
 
@@ -70,6 +69,7 @@ async def on_confirm_broadcast(call: CallbackQuery, state: FSMContext, conn: Con
 
         await call.message.edit_text("Рассылка пользователям запущена...")
         broadcaster = Broadcaster(
+            pool=pool,
             bot=bot,
             session=conn,
             admin_id=call.from_user.id,

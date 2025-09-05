@@ -1,6 +1,6 @@
 from typing import AsyncGenerator
 
-from asyncpg import Connection
+from asyncpg import Connection, Pool
 
 
 class UserActions:
@@ -58,30 +58,25 @@ class UserActions:
         """
         await self._conn.execute(query, new_lang, tg_id)
 
-    async def get_user_ids_batch(self, offset: int, limit: int = 5000) -> list[int]:
-
+    async def get_user_ids_batch(self, offset: int, pool: Pool, limit: int = 5000, ) -> list[int]:
         query = """
             SELECT tg_id FROM users
-            ORDER BY tg_id -- Tartiblash muhim, chunki LIMIT/OFFSET ishonchli ishlashi uchun
+            ORDER BY tg_id
             LIMIT $1 OFFSET $2
         """
-
-        rows = await self._conn.fetch(query, limit, offset)
-
-        return [row['tg_id'] for row in rows]
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(query, limit, offset)
+            return [row["tg_id"] for row in rows]
 
     async def iterate_user_ids(
         self,
+        pool: Pool,
         batch_size: int = 5000
     ) -> AsyncGenerator[tuple[list[int], int], None]:
-
         offset = 0
-
         while True:
-            user_ids = await self.get_user_ids_batch(offset, batch_size)
-
+            user_ids = await self.get_user_ids_batch(offset, pool, batch_size)
             if not user_ids:
                 break
-
             yield user_ids, offset
             offset += len(user_ids)
