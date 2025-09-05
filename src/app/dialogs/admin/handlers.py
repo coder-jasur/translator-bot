@@ -1,7 +1,6 @@
 import logging
 
 from aiogram import Router, Bot
-from aiogram.fsm.context import FSMContext
 from aiogram.types import (
     Message,
     CallbackQuery,
@@ -12,10 +11,12 @@ from aiogram_dialog.widgets.kbd import Button, Start
 from aiogram_dialog.widgets.text import Const, Case
 from asyncpg import Connection
 
+from src.app.database.queries.channels import ChannelActions
 from src.app.database.queries.users import UserActions
 from src.app.services.broadcaster import Broadcaster
 from src.app.states.admin import AdminStateSG
 from src.app.states.broadcast import BroadcasterSG
+from src.app.states.channel import ChannelsMenu, ChannelMenu
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +133,7 @@ async def on_publish(
 
             broadcaster = Broadcaster(
                 bot=bot,
-                conn=session,
+                session=session,
                 admin_id=call.from_user.id,
                 broadcasting_message=message,
                 album=album,
@@ -162,7 +163,7 @@ async def on_publish(
 
             if count_deactivated:
                 result_message += (
-                    f"\nОбнаружено {count_deleted} аккаунтов, которые деактивированы."
+                    f"\nОбнаружено {count_deactivated} аккаунтов, которые деактивированы."
                 )
 
             if not count_blocked and not count_deleted and not count_limited and not count_deactivated:
@@ -239,3 +240,65 @@ broadcaster_dialog = Dialog(
         state=BroadcasterSG.confirm_broadcasting
     )
 )
+
+async def add_channel(message: Message, _, manager: DialogManager) -> None:
+    conn: Connection = manager.middleware_data["conn"]
+
+    if not message.forward_from_chat:
+        await manager.update({"msg_type": "not_forwarded"})
+        return
+
+    try:
+        channel_actions = ChannelActions(conn)
+        channel_data = await channel_actions.get_channel(message.forward_from_chat.id)
+        if channel_data:
+            await manager.update({"msg_type": "already_exists"})
+            return
+
+        channel_name = message.forward_from_chat.full_name
+        channel_id = message.forward_from_chat.id
+        channel_username = message.forward_from_chat.username
+
+        await channel_actions.add_channel(channel_id, channel_name, channel_username)
+        await manager.switch_to(ChannelsMenu.menu)
+        return
+
+    except Exception as e:
+        print("Add channel error:", e)
+
+
+async def get_channel_info(
+    _,
+    __,
+    dialog_manager: DialogManager,
+    item_id: str):
+    await dialog_manager.start(ChannelMenu.menu, data={"channel_id": int(item_id)})
+
+
+async def on_delete_channel(call: CallbackQuery, _, manager: DialogManager):
+    conn: Connection = manager.middleware_data["conn"]
+    channel_id = manager.dialog_data.get("channel_id")
+    channel_actions = ChannelActions(conn)
+    print(channel_id)
+
+    await channel_actions.delete_channel(channel_id)
+    await manager.switch_to(ChannelsMenu.menu)
+
+
+async def on_edit_op(_, __, manager: DialogManager):
+    conn: Connection = manager.middleware_data["conn"]
+    channel_id = manager.dialog_data.get("channel_id")
+    channel_actions = ChannelActions(conn)
+    channel_data = await channel_actions.get_channel(channel_id)
+
+
+    if channel_data[3] == "True":
+        await channel_actions.update_channel_status("False", channel_id)
+        await manager.switch_to(ChannelMenu.menu)
+    elif channel_data[3] == "False":
+        await channel_actions.update_channel_status("True", channel_id)
+        await manager.switch_to(ChannelMenu.menu)
+
+
+
+

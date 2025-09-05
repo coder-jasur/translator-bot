@@ -1,8 +1,7 @@
 import asyncio
 import logging
-from typing import Union, Optional
+from typing import Union, Optional, Any
 
-import asyncpg
 from aiogram import Bot, types
 from aiogram.exceptions import TelegramForbiddenError, TelegramBadRequest, TelegramRetryAfter, TelegramAPIError
 from aiogram.types import (
@@ -11,11 +10,9 @@ from aiogram.types import (
 )
 from asyncpg import Connection
 
-from src.app.database.queries.users import UserActions
-
 from src.app.common.db_url import construct_postgresql_url
 from src.app.core.config import Settings
-from src.app.keyboards.inline import back_to_admin_menu_keyboards
+from src.app.database.queries.users import UserActions
 
 logger = logging.getLogger(__name__)
 
@@ -23,28 +20,29 @@ logger = logging.getLogger(__name__)
 class Broadcaster:
 
     def __init__(
-        self,
-        bot: Bot,
-        conn: Connection,
-        admin_id: int,
-        broadcasting_message: Message | None = None,
-        album: list[Message] | None = None,
-        batch_size: int = 5000,
-        sleep_seconds: float = 0.04  # Default: 25 messages per second (below API limit)
+            self,
+            bot: Bot,
+            session: Connection,
+            admin_id: int,
+            broadcasting_message: Message | None = None,
+            album: list[Message] | None = None,
+            batch_size: int = 5000,
+            sleep_seconds: float = 0.04  # Default: 25 messages per second (below API limit)
     ):
         """
         Initialize the broadcaster
 
         Args:
             bot: Telegram Bot instance
-            conn: Database session
+            session: Database session
+            user_ids: List of user IDs to send message to
             admin_id: Admin user ID for status reports
             broadcasting_message: Single message to broadcast
             album: Media album to broadcast
             sleep_seconds: Delay between messages to avoid rate limits
         """
         self._bot = bot
-        self._conn = conn
+        self._session = session
         self.broadcasting_message = broadcasting_message
         self.album = album
         self.admin_id = admin_id
@@ -59,15 +57,15 @@ class Broadcaster:
         self.total_processed = 0
 
         # Списки различных типов блокировок
-        self.blocked_users: list[int] = []  # Пользователи, заблокировавшие бота
-        self.deleted_users: list[int] = []  # Пользователи, чей аккаунт удален
+        self.blocked_users: list[int] = []      # Пользователи, заблокировавшие бота
+        self.deleted_users: list[int] = []      # Пользователи, чей аккаунт удален
         self.deactivated_users: list[int] = []  # Пользователи, чей аккаунт был деактивирован
-        self.limited_users: list[int] = []  # Пользователи, чей аккаунт временно ограничен
+        self.limited_users: list[int] = []      # Пользователи, чей аккаунт временно ограничен
 
-        self.total_blocked_users: int = 0  # Количество пользователей, заблокировавшие бота
-        self.total_deleted_users: int = 0  # Количество пользователей, чей аккаунт удален
-        self.total_deactivated_users: int = 0  # Количество пользователей, чей аккаунт был деактивирован
-        self.total_limited_users: int = 0  # Количество пользователей, чей аккаунт временно ограничен
+        self.total_blocked_users: int = 0       # Количество пользователей, заблокировавшие бота
+        self.total_deleted_users: int = 0       # Количество пользователей, чей аккаунт удален
+        self.total_deactivated_users: int = 0   # Количество пользователей, чей аккаунт был деактивирован
+        self.total_limited_users: int = 0       # Количество пользователей, чей аккаунт временно ограничен
 
         # Validate input parameters
         if not (broadcasting_message or album):
@@ -91,10 +89,10 @@ class Broadcaster:
         )
 
     async def _update_info_message(
-        self,
-        info_message: Message,
-        info_message_text: str,
-        include_total: bool = False
+            self,
+            info_message: Message,
+            info_message_text: str,
+            include_total: bool = False
     ) -> None:
         """
         Update status message with current progress
@@ -116,50 +114,47 @@ class Broadcaster:
             )
 
             if include_total:
-                text += f"\n\n👥 Всего обработано: {self.total_processed} пользователей"
+                text += f"\n\nВсего обработано: {self.total_processed} пользователей"
 
-            await info_message.edit_text(text, reply_markup=back_to_admin_menu_keyboards)
+            await info_message.edit_text(text)
 
         except Exception as e:
             logger.error(f"Error updating info message: {e}")
 
-    async def broadcast(self) -> tuple[int, int, int, int]:
+    async def broadcast(self) -> tuple[list[Any], list[Any], list[Any], list[Any]]:
         """
         Start broadcasting messages to all users
 
         Returns:
             List of user IDs who blocked the bot
         """
-        text_template = (
-            "📢 Статистика рассылки\n"
-            "━━━━━━━━━━━━━━━\n"
-            "✉️ Отправлено: {sent}\n"
-            "❌ Ошибок: {failed}\n"
-            "🚫 Заблокировали бота: {blocked}\n"
-            "🗑️ Удалённые аккаунты: {deleted}\n"
-            "⛔ Ограниченные аккаунты: {limited}\n"
-            "📤 Деактивированные: {deactivated}\n"
-            "🔄 Обработано пакетов: {batches}"
+        info_message_text = (
+            "Отправка сообщений: {sent}\n"
+            "Не удалось отправить: {failed}\n"
+            "Заблокировали: {blocked}\n"
+            "Удаленных аккаунтов: {deleted}\n"
+            "Ограниченных: {limited}\n"
+            "Деактивированных: {deactivated}\n"
+            "Обработано пачек: {batches}"
         )
 
         # Инициализация сообщения со статусом
-        info_message = await self._send_info_message(text_template)
+        info_message = await self._send_info_message(info_message_text)
 
         try:
             logger.info("Starting batch broadcast")
 
-            user_actions = UserActions(self._conn)
-
             # Обрабатываем пользователей пачками
+            user_actions = UserActions(self._session)
             async for user_ids, offset in user_actions.iterate_user_ids(self.batch_size):
                 # Обрабатываем текущую пачку пользователей
-                await self._process_batch(user_ids, info_message, text_template)
+                await self._process_batch(user_ids, info_message, info_message_text)
 
                 self.processed_batches += 1
                 self.total_processed += len(user_ids)
 
                 # Обновляем сообщение о статусе после каждой пачки
-                await self._update_info_message(info_message, text_template)
+                await self._update_info_message(info_message, info_message_text)
 
                 # Если есть заблокированные пользователи, помечаем их в базе данных
                 if self.blocked_users or self.deleted_users or self.limited_users or self.deactivated_users:
@@ -198,13 +193,14 @@ class Broadcaster:
             logger.error(f"Broadcasting error: {e}")
             await self._bot.send_message(
                 self.admin_id,
-                f"E'lon tarqatishda xatolik kuzatildi: {e}"
+                f"Ошибка при рассылке: {e}"
             )
         finally:
             # Финальное обновление статуса
             try:
-                await self._update_info_message(info_message, text_template, include_total=True)
-            except:
+                await self._update_info_message(info_message, info_message_text, include_total=True)
+            except Exception as e:
+                print(e)
                 pass
 
             # Удаляем предпросмотр рассылки
@@ -219,17 +215,13 @@ class Broadcaster:
                     deactivated_user_ids=self.deactivated_users
                 )
 
-        return (
-            self.total_blocked_users, self.total_deleted_users,
-            self.total_limited_users, self.total_deactivated_users
-        )
-
+        return self.blocked_users, self.deleted_users, self.limited_users, self.deactivated_users
 
     async def _process_batch(
-        self,
-        user_ids: list[int],
-        info_message: Message,
-        info_message_text: str
+            self,
+            user_ids: list[int],
+            info_message: Message,
+            info_message_text: str
     ) -> None:
         """
         Process a batch of users
@@ -341,10 +333,10 @@ class Broadcaster:
     async def _update_user_status(self, user_ids: list[int], status: str = "blocked") -> None:
         query = """
             UPDATE users
-            SET status = ?
-            WHERE users.tg_id IN ?
+            SET status = $1
+            WHERE users.tg_id = $2
         """
-        await self._conn.execute(query, (status, user_ids,))
+        await self._session.execute(query, (status, user_ids,))
 
     async def _mark_user_statuses(
         self,
@@ -386,12 +378,12 @@ class Broadcaster:
             # Применение изменений
             if blocked_user_ids or deleted_user_ids or limited_users_ids or deactivated_user_ids:
                 dns = construct_postgresql_url(Settings())
-                await self._conn.execute(dns)
+                await self._session.execute(dns)
 
         except Exception as e:
             logger.error(f"Failed to mark user statuses: {e}")
             # Откатываем транзакцию в случае ошибки
-            await self._conn.close()
+            await self._session.close()
 
     async def _delete_preview(self) -> None:
         """Delete preview messages from admin chat"""
