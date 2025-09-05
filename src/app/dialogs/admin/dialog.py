@@ -9,7 +9,7 @@ from aiogram_dialog.widgets.text import Const, Format, Case
 from src.app.dialogs.admin.getters import op_menu_getter, add_channel_title_getter, channel_info_getter
 from src.app.dialogs.admin.handlers import (
     users_count_getter, add_channel, get_channel_info, on_delete_channel,
-    on_edit_op
+    on_edit_op, on_quit_admin_menu
 )
 from src.app.states.admin import AdminStateSG
 from src.app.states.broadcast import BroadcasterSG
@@ -33,6 +33,7 @@ admin_menu = Dialog(
             id="users_count",
             state=AdminStateSG.users_count
         ),
+        Button(Const("выйти"), id="quit",  on_click=on_quit_admin_menu),
         state=AdminStateSG.menu
     ),
     Window(

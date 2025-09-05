@@ -1,6 +1,6 @@
 import logging
 
-from aiogram import Router, Bot
+from aiogram import Bot
 from aiogram.types import (
     Message,
     CallbackQuery,
@@ -20,7 +20,6 @@ from src.app.states.channel import ChannelsMenu, ChannelMenu
 
 logger = logging.getLogger(__name__)
 
-broadcater_router = Router()
 
 
 async def users_count_getter(dialog_manager: DialogManager, **_):
@@ -275,7 +274,7 @@ async def get_channel_info(
     await dialog_manager.start(ChannelMenu.menu, data={"channel_id": int(item_id)})
 
 
-async def on_delete_channel(call: CallbackQuery, _, manager: DialogManager):
+async def on_delete_channel(_, __, manager: DialogManager):
     conn: Connection = manager.middleware_data["conn"]
     channel_id = manager.dialog_data.get("channel_id")
     channel_actions = ChannelActions(conn)
@@ -299,6 +298,10 @@ async def on_edit_op(_, __, manager: DialogManager):
         await channel_actions.update_channel_status("True", channel_id)
         await manager.switch_to(ChannelMenu.menu)
 
+
+async def on_quit_admin_menu(call: CallbackQuery, __, manager: DialogManager):
+    await manager.done()
+    await call.message.edit_text("вы вышли из меню админа")
 
 
 

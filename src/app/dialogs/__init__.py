@@ -13,7 +13,6 @@ def dialog_register(dp: Dispatcher):
     dialog_register_router.include_router(OP_dialog)
     dialog_register_router.include_router(broadcaster_dialog)
     dialog_register_router.include_router(channel_menu_dialog)
-
     dialog_register_router.include_router(choose_language_dialog)
     dialog_register_router.include_router(translate_languages)
 
