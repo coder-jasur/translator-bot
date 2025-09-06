@@ -3,8 +3,9 @@ from aiogram_dialog import DialogManager
 from asyncpg import Connection
 
 from src.app.database.queries.channels import ChannelActions
+from src.app.database.queries.users import UserActions
 from src.app.keyboards.inline import not_channels_button
-from src.app.states.language import ChooseTranslateLanguagesSG
+from src.app.states.language import ChooseTranslateLanguagesSG, ChooseLanguageSG
 from src.app.texts import texts
 
 check_sub_router = Router()
@@ -18,6 +19,8 @@ async def check_channel_sub(
     lang: str,
 ):
     channel_actions = ChannelActions(conn)
+    user_actions = UserActions(conn)
+    user_data = user_actions.get_user(dialog_manager.event.from_user.id)
     channel_data = await channel_actions.get_all_channels()
     not_sub_channels = []
 
@@ -28,7 +31,10 @@ async def check_channel_sub(
                 not_sub_channels.append(channel)
 
     if not not_sub_channels:
-        await dialog_manager.start(ChooseTranslateLanguagesSG.choose_language)
+        if not user_data[3]:
+            await dialog_manager.start(ChooseLanguageSG.choose_language)
+        else:
+            await dialog_manager.start(ChooseTranslateLanguagesSG.choose_language)
     else:
         try:
             await dialog_manager.event.message.edit_text(
