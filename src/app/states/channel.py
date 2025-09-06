@@ -12,3 +12,5 @@ class ChannelMenu(StatesGroup):
     delite_channel_message = State()
     add_channel_message = State()
 
+class NotSubChannelSG(StatesGroup):
+    channels_list = State()

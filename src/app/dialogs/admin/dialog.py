@@ -18,11 +18,11 @@ from src.app.states.channel import ChannelsMenu, ChannelMenu
 admin_menu = Dialog(
     Window(
         Const("Выберите действие"),
-        # Start(
-        #     Const("ОП"),
-        #     id="subscription_channel",
-        #     state=ChannelsMenu.menu
-        # ),
+        Start(
+            Const("ОП"),
+            id="subscription_channel",
+            state=ChannelsMenu.menu
+        ),
         Button(
             Const("Рассылка"),
             id="broadcaster",

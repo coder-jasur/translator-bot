@@ -1,13 +1,55 @@
-from aiogram.filters import Filter
+from aiogram import Router, Bot, F
 from aiogram.types import Message, CallbackQuery
+from aiogram_dialog import DialogManager
 from asyncpg import Connection
 
 from src.app.database.queries.channels import ChannelActions
-from src.app.database.queries.users import UserActions
+from src.app.filters.check_channel_sub import CheckSubscription
+from src.app.keyboards.inline import not_channels_button
+from src.app.states.language import ChooseTranslateLanguagesSG
+from src.app.texts import texts
+
+check_channel_sub_router = Router()
+check_channel_sub_router.message.filter(CheckSubscription())
+check_channel_sub_router.callback_query.filter(CheckSubscription())
 
 
-# class CheckSubscription(Filter):
-#     async def __call__(self, message: Message | CallbackQuery, conn: Connection, lang: str, **kwargs):
-#         channel_actions = ChannelActions(conn)
-#         ch = await channel_actions.get_all_channels()
+@check_channel_sub_router.message()
+async def check_channel_sub(message: Message, conn: Connection, bot: Bot, lang: str):
+    channel_actions = ChannelActions(conn)
+    channel_data = await channel_actions.get_all_channels()
+    not_sub_channels = []
+    for channel in channel_data:
+        if channel[3] == "True":
+            user_status = await bot.get_chat_member(channel[0], message.from_user.id)
+            if user_status.status not in ["member", "administrator", "creator"]:
+                not_sub_channels.append(channel)
 
+    print(not_sub_channels)
+
+    await message.answer(
+        texts["not_subscripted"][lang],
+        reply_markup=not_channels_button(not_sub_channels)
+    )
+
+
+
+
+
+@check_channel_sub_router.callback_query()
+async def check_channel_sub(call: CallbackQuery, conn: Connection, bot: Bot, lang: str):
+    channel_actions = ChannelActions(conn)
+    channel_data = await channel_actions.get_all_channels()
+    not_sub_channels = []
+    for channel in channel_data:
+        if channel[3] == "True":
+            user_status = await bot.get_chat_member(channel[0], call.from_user.id)
+            if user_status.status not in ["member", "administrator", "creator"]:
+                not_sub_channels.append(channel)
+
+    print(not_sub_channels)
+
+    await call.message.answer(
+        texts["not_subscripted"][lang],
+        reply_markup=not_channels_button(not_sub_channels)
+    )

@@ -37,5 +37,15 @@ texts = {
         "uz": "🔎 Avtomatik aniqlash",
         "ru": "🔎 Автоматическое обнаружение",
         "en": "🔎 Auto detect"
+    },
+    "not_subscripted": {
+        "uz": "🤖 Botdan foydalanish uchun quyidagi kanallarga obuna bo‘ling:",
+        "ru": "🤖 Чтобы пользоваться ботом, подпишитесь на эти каналы:",
+        "en": "🤖 To use the bot, please subscribe to the following channels:"
+    },
+    "not_subscripted_all_channel": {
+        "uz": "❕ Siz barcha kanallarga obuna bo'lmagansiz.",
+        "ru": "❕ Вы не подписаны на все каналы.",
+        "en": "❕ You are not subscribed to all channels."
     }
 }

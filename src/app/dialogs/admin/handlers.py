@@ -81,7 +81,7 @@ async def on_delete_channel(_, __, manager: DialogManager):
     print(channel_id)
 
     await channel_actions.delete_channel(channel_id)
-    await manager.switch_to(ChannelsMenu.menu)
+    await manager.start(ChannelsMenu.menu)
 
 
 async def on_edit_op(_, __, manager: DialogManager):
