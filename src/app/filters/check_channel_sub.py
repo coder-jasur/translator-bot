@@ -7,7 +7,7 @@ from src.app.database.queries.channels import ChannelActions
 
 
 class CheckSubscription(BaseFilter):
-    async def __call__(self, event: Message | CallbackQuery, conn: Connection, lang: str, bot: Bot, **kwargs):
+    async def __call__(self, event: Message | CallbackQuery, conn: Connection, bot: Bot, **kwargs):
         channel_actions = ChannelActions(conn)
         channel_data = await channel_actions.get_all_channels()
 
