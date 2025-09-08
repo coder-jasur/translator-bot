@@ -1,12 +1,10 @@
-from aiogram import Router, Bot, F
+from aiogram import Router, Bot
 from aiogram.types import Message, CallbackQuery
-from aiogram_dialog import DialogManager
 from asyncpg import Connection
 
 from src.app.database.queries.channels import ChannelActions
 from src.app.filters.check_channel_sub import CheckSubscription
 from src.app.keyboards.inline import not_channels_button
-from src.app.states.language import ChooseTranslateLanguagesSG
 from src.app.texts import texts
 
 check_channel_sub_router = Router()

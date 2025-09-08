@@ -34,7 +34,7 @@ async def main():
     dp = Dispatcher()
     dialog_register(dp)
     register_all_routers(dp, settings.admins_ids)
-    user_dialog_register(dp)
+
     register_middlewares(dp, pool, settings)
     setup_dialogs(dp)
 
