@@ -15,11 +15,12 @@ def register_all_routers(dp: Dispatcher, admins: list):
     registrar_admin_routers(main_router, admins)
     main_router.include_router(check_sub_router)
     main_router.include_router(check_channel_sub_router)
-    user_dialog_register(dp)
+
     main_router.include_router(start_router)
     main_router.include_router(language_router)
     main_router.include_router(broadcater_router)
     main_router.include_router(translate_router)
+    user_dialog_register(dp)
 
     dp.include_router(main_router)
 
