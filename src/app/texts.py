@@ -47,5 +47,10 @@ texts = {
         "uz": "❕ Siz barcha kanallarga obuna bo'lmagansiz.",
         "ru": "❕ Вы не подписаны на все каналы.",
         "en": "❕ You are not subscribed to all channels."
+    },
+    "save_tools": {
+        "uz": "✅ saqlash",
+        "ru": "✅ сохранить",
+        "en": "✅ save"
     }
 }

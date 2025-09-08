@@ -20,10 +20,9 @@ def make_languages(selected: str):
         "zh-TW": "🇨🇳 Chinese"
 
     }
-    print(selected)
 
     return [
-        (code, name + (" ✅" if code == selected else ""))
+        (code, name + (" 🟢" if code == selected else ""))
         for code, name in langs.items()
     ]
 
@@ -40,9 +39,8 @@ def make_languages_to(selected: str):
         "ko": "🇰🇷 Korean",
         "zh-TW": "🇨🇳 Chinese"
     }
-    print(selected)
     return [
-        (code + "_lang to", name + (" ✅" if code == selected else ""))
+        (code + "_lang to", name + (" 🟢" if code == selected else ""))
         for code, name in langs.items()
     ]
 
@@ -77,5 +75,6 @@ async def trasnlate_languages_getter(dialog_manager: DialogManager, **_):
         "buttons_list": buttons,
         "lang_from": texts["lang_ariented_text"]["lang_from"][lang],
         "lang_to": texts["lang_ariented_text"]["lang_to"][lang],
-        "auto": texts["auto_detect"][lang] + " ✅" if user_data[5] == "auto" else texts["auto_detect"][lang]
+        "auto": texts["auto_detect"][lang] + " 🟢" if user_data[5] == "auto" else texts["auto_detect"][lang],
+        "save_tools": texts["save_tools"][lang]
     }

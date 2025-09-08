@@ -13,7 +13,7 @@ check_channel_sub_router.callback_query.filter(CheckSubscription())
 
 
 @check_channel_sub_router.message()
-async def check_channel_sub(message: Message, conn: Connection, bot: Bot, lang: str):
+async def check_channel_sub_message(message: Message, conn: Connection, bot: Bot, lang: str):
     channel_actions = ChannelActions(conn)
     channel_data = await channel_actions.get_all_channels()
     not_sub_channels = []
@@ -35,7 +35,7 @@ async def check_channel_sub(message: Message, conn: Connection, bot: Bot, lang: 
 
 
 @check_channel_sub_router.callback_query()
-async def check_channel_sub(call: CallbackQuery, conn: Connection, bot: Bot, lang: str):
+async def check_channel_sub_call(call: CallbackQuery, conn: Connection, bot: Bot, lang: str):
     channel_actions = ChannelActions(conn)
     channel_data = await channel_actions.get_all_channels()
     not_sub_channels = []

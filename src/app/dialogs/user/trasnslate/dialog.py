@@ -5,7 +5,10 @@ from aiogram_dialog.widgets.kbd import Group, Select, Row, Button
 from aiogram_dialog.widgets.text import Format
 
 from src.app.dialogs.user.trasnslate.getters import trasnlate_languages_getter
-from src.app.dialogs.user.trasnslate.handlers import on_choose_translate_lang_to, on_auto_detect
+from src.app.dialogs.user.trasnslate.handlers import (
+    on_choose_translate_lang_to, on_auto_detect,
+    on_save_tools_trasnlate_lang
+)
 from src.app.states.language import ChooseTranslateLanguagesSG
 
 translate_languages = Dialog(
@@ -27,6 +30,7 @@ translate_languages = Dialog(
             width=2
         ),
         Button(Format("{auto}"), id="auto", on_click=on_auto_detect),
+        Button(Format("{save_tools}"), id="save_tools", on_click=on_save_tools_trasnlate_lang),
         state=ChooseTranslateLanguagesSG.choose_language,
         getter=trasnlate_languages_getter
     )

@@ -1,5 +1,5 @@
 from aiogram.types import CallbackQuery
-from aiogram_dialog import DialogManager
+from aiogram_dialog import DialogManager, ShowMode
 from aiogram_dialog.widgets.kbd import Button, Select
 from asyncpg import Connection
 
@@ -44,3 +44,6 @@ async def on_auto_detect(call: CallbackQuery, button: Button, dialog_manager: Di
     except Exception as e:
         print("Error", e)
         await texts["auto_detect"][lang]
+
+async def on_save_tools_trasnlate_lang(_, __, dialog_manager: DialogManager):
+    await dialog_manager.done()
