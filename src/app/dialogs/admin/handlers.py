@@ -62,13 +62,14 @@ async def add_channel_input(message: Message, _, dialog_manager: DialogManager):
     conn: Connection = dialog_manager.middleware_data["conn"]
     channel_actions = ChannelActions(conn)
     channel_data = dialog_manager.dialog_data.get("channel_data")
+    print(message.text)
 
     try:
         await channel_actions.add_channel(
-            channel_data["channel_id"],
-            channel_data["channel_name"],
-            channel_data["channel_username"],
-            message.text
+            channel_id=channel_data["channel_id"],
+            channel_name=channel_data["channel_name"],
+            channel_username=channel_data["channel_username"],
+            channel_url=message.text
         )
         await dialog_manager.start(ChannelsMenu.menu)
 

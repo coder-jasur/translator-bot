@@ -36,8 +36,8 @@ async def create_channels_table(conn: Connection):
             channel_name TEXT NOT NULL,
             channel_username TEXT NOT NULL,
             channel_status TEXT NOT NULL,
+            created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
             channel_url TEXT,
-            created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
         )
     """
     await conn.execute(query)
