@@ -30,7 +30,6 @@ translate_languages = Dialog(
             width=2
         ),
         Button(Format("{auto}"), id="auto", on_click=on_auto_detect),
-        Button(Format("{save_tools}"), id="save_tools", on_click=on_save_tools_trasnlate_lang),
         state=ChooseTranslateLanguagesSG.choose_language,
         getter=trasnlate_languages_getter
     )
