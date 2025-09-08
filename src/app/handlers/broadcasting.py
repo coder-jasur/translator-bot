@@ -28,7 +28,7 @@ async def get_broadcasting_message(message: Message, state: FSMContext, **kwargs
     if message.poll:
         await message.delete()
         return await message.answer(
-            "❌ Неправильный формат!"
+            "✖ Неправильный формат!"
         )
 
     album = kwargs.get("album")
@@ -43,8 +43,8 @@ async def get_broadcasting_message(message: Message, state: FSMContext, **kwargs
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=[
                 [
-                    InlineKeyboardButton(text="❌ Отменить", callback_data="broadcast:cancel"),
-                    InlineKeyboardButton(text="✅ Подтвердить", callback_data="broadcast:confirm"),
+                    InlineKeyboardButton(text="✖ Отменить", callback_data="broadcast:cancel"),
+                    InlineKeyboardButton(text="✔ Подтвердить", callback_data="broadcast:confirm"),
                 ]
             ]
         )

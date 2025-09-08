@@ -20,8 +20,7 @@ async def op_menu_getter(dialog_manager: DialogManager, **_):
         "msg_type": message_type if message_type else "start_msg"
     }
 
-
-async def add_channel_title_getter(dialog_manager: DialogManager, **_):
+async def add_chanenl_getter(dialog_manager: DialogManager, **_):
     return {
         "msg_type": dialog_manager.dialog_data.get("msg_type", "start_msg")
     }
@@ -49,7 +48,7 @@ async def channel_info_getter(dialog_manager: DialogManager, **_):
             f"📛 Название: <b>{channel_data[1]}</b>\n"
             f"🔗 Юзернейм: <b>@{channel_data[2]}</b>\n"
             f"📶 Статус: <code>{channel_data[3]}</code>\n"
-            f"🚀 Ссылка: https://t.me/{channel_data[2]}\n\n"
+            f"🚀 Ссылка: {channel_data[4]}\n\n"
         ),
         "op_button": op_button
     }

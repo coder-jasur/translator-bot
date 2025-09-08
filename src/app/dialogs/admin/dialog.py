@@ -1,19 +1,19 @@
 from operator import itemgetter
 
 from aiogram.enums import ContentType
-from aiogram_dialog import Dialog, Window, StartMode
+from aiogram_dialog import Dialog, Window
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, SwitchTo, Start, Row, Select, Group
 from aiogram_dialog.widgets.text import Const, Format, Case
 
-from src.app.dialogs.admin.getters import op_menu_getter, add_channel_title_getter, channel_info_getter
+from src.app.dialogs.admin.getters import op_menu_getter, channel_info_getter, add_chanenl_getter
+
 from src.app.dialogs.admin.handlers import (
-    users_count_getter, add_channel, get_channel_info, on_delete_channel,
-    on_edit_op, on_quit_admin_menu, on_broadcast
+    users_count_getter, add_channel_input, get_channel_info, on_delete_channel,
+    on_edit_op, on_quit_admin_menu, on_broadcast, take_channel_data, on_done_dialog
 )
 from src.app.states.admin import AdminStateSG
-from src.app.states.broadcast import BroadcasterSG
-from src.app.states.channel import ChannelsMenu, ChannelMenu
+from src.app.states.channel import ChannelsMenu, ChannelMenu, AddChannelSG
 
 admin_menu = Dialog(
     Window(
@@ -33,18 +33,18 @@ admin_menu = Dialog(
             id="users_count",
             state=AdminStateSG.users_count
         ),
-        Button(Const("выйти"), id="quit",  on_click=on_quit_admin_menu),
+        Button(Const("◄ выйти"), id="quit", on_click=on_quit_admin_menu),
         state=AdminStateSG.menu
     ),
     Window(
         Format("{users_count}"),
-        SwitchTo(Const("назад"), id="back_to_admin_menu", state=AdminStateSG.menu),
+        SwitchTo(Const("◄ назад"), id="back_to_admin_menu", state=AdminStateSG.menu),
         state=AdminStateSG.users_count,
         getter=users_count_getter
     ),
 )
 
-OP_dialog = Dialog(
+op_dialog = Dialog(
     Window(
         Case(
             {
@@ -60,29 +60,45 @@ OP_dialog = Dialog(
                 item_id_getter=itemgetter(0),
                 items="channel_data",
                 on_click=get_channel_info,
-
             ),
             width=1
         ),
-        SwitchTo(Const("добавить канал"), id="add_channel", state=ChannelsMenu.add_channel),
-        Start(Const("назад"), id="back_to_admin_menu", state=AdminStateSG.menu),
+        Start(Const("добавить канал"), id="add_channel", state=AddChannelSG.get_channel_data),
+        Button(Const("◄ назад"), id="back_to_admin_menu", on_click=on_done_dialog),
         state=ChannelsMenu.menu,
         getter=op_menu_getter
+    ),
+)
+
+add_channel_dialog = Dialog(
+    Window(
+        Case(
+            {
+                "start_msg": Const(
+                    "🔗 Чтобы добавить канал или группу, отправьте любой пост с канала и добавьте бота в канал или группу."
+                ),
+                "not_forwarded": Const("отправьте пост с канала!"),
+            },
+            selector="msg_type",
+        ),
+        MessageInput(func=take_channel_data, content_types=ContentType.ANY),
+        Start(Const("◄ назад"), id="op_menu", state=ChannelsMenu.menu),
+        state=AddChannelSG.get_channel_data,
+        getter=add_chanenl_getter,
     ),
     Window(
         Case(
             {
-                "start_msg": Const("🔗 Чтобы добавить канал или группу..."),
-                "not_forwarded": Const("❌ отправьте пост с канала!"),
-                "already_exists": Const("уже существует")
+                "start_msg": Const("оптправьте ссылку на канал"),
+                "error": Const("Произошла ошибка при добавлении канала!"),
+                "already_exists": Const("✖ Канал уже существует!"),
             },
-            selector="msg_type"
+            selector="msg_type",
         ),
-        MessageInput(func=add_channel, content_types=ContentType.ANY),
-        SwitchTo(Const("назад"), id="op_menu", state=ChannelsMenu.menu),
-        getter=add_channel_title_getter,
-        state=ChannelsMenu.add_channel
-    )
+        MessageInput(func=add_channel_input, content_types=ContentType.ANY),
+        state=AddChannelSG.get_channel_link,
+        getter=add_chanenl_getter,
+    ),
 )
 
 channel_menu_dialog = Dialog(
@@ -90,11 +106,11 @@ channel_menu_dialog = Dialog(
         Format("{channel_data}"),
         Group(
             Row(
-                SwitchTo(Const("❌ Удалить канал"), id="delete_channel", state=ChannelMenu.delite_channel),
+                SwitchTo(Const("✖ Удалить канал"), id="delete_channel", state=ChannelMenu.delite_channel),
                 Button(Format("{op_button}"), id="remove_from_op", on_click=on_edit_op),
             ),
             Row(
-                Start(Const("⬅️ Назад"), id="back", state=ChannelsMenu.menu),
+                Start(Const("◄ Назад"), id="back", state=ChannelsMenu.menu),
             ),
         ),
         state=ChannelMenu.menu,

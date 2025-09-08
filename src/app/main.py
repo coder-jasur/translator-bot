@@ -13,6 +13,7 @@ from src.app.common.db_url import construct_postgresql_url
 from src.app.core.config import Settings
 from src.app.database.tables import create_database_tables
 from src.app.dialogs import dialog_register
+from src.app.dialogs.user import user_dialog_register
 from src.app.handlers import register_all_routers
 from src.app.middlewares import register_middlewares
 
@@ -31,8 +32,9 @@ async def main():
         await create_database_tables(conn)
 
     dp = Dispatcher()
-    register_all_routers(dp, settings.admins_ids)
     dialog_register(dp)
+    register_all_routers(dp, settings.admins_ids)
+    user_dialog_register(dp)
     register_middlewares(dp, pool, settings)
     setup_dialogs(dp)
 

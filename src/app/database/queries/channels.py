@@ -10,12 +10,13 @@ class ChannelActions:
         self, channel_id: int,
         channel_name: str,
         channel_username: str,
+        channel_url: str,
         channel_status: str = "True"
     ):
         query = """
-            INSERT INTO channel(channel_id, channel_name, channel_username, channel_status) VALUES($1, $2, $3, $4)      
+            INSERT INTO channel(channel_id, channel_name, channel_username, channel_status, channel_url) VALUES($1, $2, $3, $4, $5)      
         """
-        await self._conn.execute(query, channel_id, channel_name, channel_username, channel_status)
+        await self._conn.execute(query, channel_id, channel_name, channel_username, channel_status, channel_url)
 
     async def add_channel_message(self, channel_id: int, channel_message: str):
         query = """

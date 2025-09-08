@@ -1,24 +1,17 @@
 import logging
 
-from aiogram import Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import (
-    Message,
-    CallbackQuery,
+    CallbackQuery, Message,
 )
-from aiogram_dialog import DialogManager, StartMode, Window, Dialog, ShowMode
-from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Start
-from aiogram_dialog.widgets.text import Const, Case
+from aiogram_dialog import DialogManager
 from asyncpg import Connection
 
 from src.app.database.queries.channels import ChannelActions
 from src.app.database.queries.users import UserActions
 from src.app.handlers.broadcasting import start_broadcasting_manager
-from src.app.services.broadcaster import Broadcaster
 from src.app.states.admin import AdminStateSG
-from src.app.states.broadcast import BroadcasterSG, BroadcastingManagerSG
-from src.app.states.channel import ChannelsMenu, ChannelMenu
+from src.app.states.channel import ChannelsMenu, ChannelMenu, AddChannelSG
 
 logger = logging.getLogger(__name__)
 
@@ -35,42 +28,58 @@ async def users_count_getter(dialog_manager: DialogManager, **_):
 
 
 
-async def on_broadcast(call: CallbackQuery, __, manager: DialogManager):
-    state: FSMContext = manager.middleware_data["state"]
-    await manager.done()
+async def on_broadcast(call: CallbackQuery, __, dialog_manager: DialogManager):
+    state: FSMContext = dialog_manager.middleware_data["state"]
+    await dialog_manager.done()
     await start_broadcasting_manager(call.message, state)
 
-async def add_channel(message: Message, _, manager: DialogManager) -> None:
-    conn: Connection = manager.middleware_data["conn"]
+async def take_channel_data(message: Message, _, dialog_manager: DialogManager) -> None:
+    conn: Connection = dialog_manager.middleware_data["conn"]
 
-    if not message.forward_from_chat:
-        await manager.update({"msg_type": "not_forwarded"})
-        return
-
-    try:
+    if message.forward_from_chat:
         channel_actions = ChannelActions(conn)
         channel_data = await channel_actions.get_channel(message.forward_from_chat.id)
+
         if channel_data:
-            await manager.update({"msg_type": "already_exists"})
+            dialog_manager.dialog_data["msg_type"] = "already_exists"
+            await dialog_manager.switch_to(AddChannelSG.get_channel_link)
             return
 
-        channel_name = message.forward_from_chat.full_name
-        channel_id = message.forward_from_chat.id
-        channel_username = message.forward_from_chat.username
+        channel_data = {
+            "channel_name": message.forward_from_chat.full_name,
+            "channel_id": message.forward_from_chat.id,
+            "channel_username": message.forward_from_chat.username
+        }
+        dialog_manager.dialog_data["channel_data"] = channel_data
 
-        await channel_actions.add_channel(channel_id, channel_name, channel_username)
-        await manager.switch_to(ChannelsMenu.menu)
+        await dialog_manager.next()
+    else:
+        dialog_manager.dialog_data["msg_type"] = "not_forwarded"
         return
+
+
+async def add_channel_input(message: Message, _, dialog_manager: DialogManager):
+    conn: Connection = dialog_manager.middleware_data["conn"]
+    channel_actions = ChannelActions(conn)
+    channel_data = dialog_manager.dialog_data.get("channel_data")
+
+    try:
+        await channel_actions.add_channel(
+            channel_data["channel_id"],
+            channel_data["channel_name"],
+            channel_data["channel_username"],
+            message.text
+        )
+        await dialog_manager.start(ChannelsMenu.menu)
 
     except Exception as e:
         print("Add channel error:", e)
+        dialog_manager.dialog_data["msg_type"] = "error"
+        return
 
 
-async def get_channel_info(
-    _,
-    __,
-    dialog_manager: DialogManager,
-    item_id: str):
+
+async def get_channel_info(_, __, dialog_manager: DialogManager, item_id: str):
     await dialog_manager.start(ChannelMenu.menu, data={"channel_id": int(item_id)})
 
 
@@ -90,18 +99,18 @@ async def on_edit_op(_, __, manager: DialogManager):
     channel_actions = ChannelActions(conn)
     channel_data = await channel_actions.get_channel(channel_id)
 
-
     if channel_data[3] == "True":
         await channel_actions.update_channel_status("False", channel_id)
-        await manager.switch_to(ChannelMenu.menu)
-    elif channel_data[3] == "False":
+    elif  channel_data[3] == "False":
         await channel_actions.update_channel_status("True", channel_id)
-        await manager.switch_to(ChannelMenu.menu)
+    await manager.switch_to(ChannelMenu.menu)
 
 
-async def on_quit_admin_menu(call: CallbackQuery, __, manager: DialogManager):
-    await manager.done()
-    await call.message.edit_text("вы вышли из меню админа")
+async def on_quit_admin_menu(_, __, dialog_manager: DialogManager):
+    await dialog_manager.reset_stack()
+    await dialog_manager.event.message.edit_text("вы вышли из меню админа")
 
-
+async def on_done_dialog(_, __, dialog_manaegr: DialogManager):
+    await dialog_manaegr.done()
+    await dialog_manaegr.start(AdminStateSG.menu)
 
