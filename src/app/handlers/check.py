@@ -20,7 +20,7 @@ async def check_channel_sub(
 ):
     channel_actions = ChannelActions(conn)
     user_actions = UserActions(conn)
-    user_data = user_actions.get_user(dialog_manager.event.from_user.id)
+    user_data = await user_actions.get_user(dialog_manager.event.from_user.id)
     channel_data = await channel_actions.get_all_channels()
     not_sub_channels = []
 
