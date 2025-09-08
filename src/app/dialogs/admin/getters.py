@@ -48,7 +48,7 @@ async def channel_info_getter(dialog_manager: DialogManager, **_):
             f"📛 Название: <b>{channel_data[1]}</b>\n"
             f"🔗 Юзернейм: <b>@{channel_data[2]}</b>\n"
             f"📶 Статус: <code>{channel_data[3]}</code>\n"
-            f"🚀 Ссылка: {channel_data[6]}\n\n"
+            f"🚀 Ссылка: {channel_data[5]}\n\n"
         ),
         "op_button": op_button
     }
