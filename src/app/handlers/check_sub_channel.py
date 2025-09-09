@@ -43,6 +43,7 @@ async def check_channel_sub_call(call: CallbackQuery, conn: Connection, bot: Bot
     user_data = await user_actions.get_user(call.from_user.id)
     if not user_data:
         await dialog_manager.start(ChooseLanguageSG.choose_language)
+        return
     lang = user_data[3]
     channel_actions = ChannelActions(conn)
     channel_data = await channel_actions.get_all_channels()
