@@ -12,7 +12,7 @@ from src.app.common.bot_command import bot_commands
 from src.app.common.db_url import construct_postgresql_url
 from src.app.core.config import Settings
 from src.app.database.tables import create_database_tables
-from src.app.dialogs import dialog_register
+from src.app.dialogs import dialog_register, choose_language_dialog
 from src.app.dialogs.admin.dialog import  add_channel_dialog
 from src.app.handlers import register_all_routers
 from src.app.middlewares import register_middlewares
@@ -33,6 +33,7 @@ async def main():
 
     dp = Dispatcher()
     dp.include_router(add_channel_dialog)
+    dp.include_router(choose_language_dialog)
     register_all_routers(dp, settings.admins_ids)
     dialog_register(dp)
     register_middlewares(dp, pool, settings)
