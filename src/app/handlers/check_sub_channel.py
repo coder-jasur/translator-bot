@@ -23,7 +23,6 @@ async def check_channel_sub_message(message: Message, conn: Connection, bot: Bot
             if user_status.status not in ["member", "administrator", "creator"]:
                 not_sub_channels.append(channel)
 
-    print(not_sub_channels)
 
     await message.answer(
         texts["not_subscripted"][lang],

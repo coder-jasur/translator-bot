@@ -35,6 +35,11 @@ async def check_channel_sub(
             await dialog_manager.start(ChooseLanguageSG.choose_language)
         else:
             await dialog_manager.start(ChooseTranslateLanguagesSG.choose_language)
+    elif not_sub_channels:
+        await dialog_manager.event.message.answer(
+            texts["not_subscripted"][lang],
+            reply_markup=not_channels_button(not_sub_channels)
+        )
     else:
         try:
             await dialog_manager.event.message.edit_text(

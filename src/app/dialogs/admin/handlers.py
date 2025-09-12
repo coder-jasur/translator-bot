@@ -52,7 +52,7 @@ async def take_channel_data(message: Message, _, dialog_manager: DialogManager) 
         }
         dialog_manager.dialog_data["channel_data"] = channel_data
 
-        await dialog_manager.next()
+        await dialog_manager.switch_to(AddChannelSG.get_channel_link)
     else:
         dialog_manager.dialog_data["msg_type"] = "not_forwarded"
         return
